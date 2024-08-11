@@ -14,6 +14,18 @@ import pickle
 import numpy as np
 import librosa
 
+def generate_overlapping_segments(audio, sr, segment_duration=1, hop_duration=0.5):
+    segment_length = int(segment_duration * sr)
+    hop_length = int(hop_duration * sr)
+    segments = []
+
+    for start in range(0, len(audio) - segment_length + 1, hop_length):
+        end = start + segment_length
+        segments.append(audio[start:end])
+
+    return segments
+
+
 def evaluate_with_overlapping_segments(model, test_dirs, index, file_names, top_k=[1, 5, 10], sr=22050):
     segment_accuracy = {duration: {k: 0 for k in top_k} for duration in test_dirs.keys()}
     total_segments = {duration: 0 for duration in test_dirs.keys()}
