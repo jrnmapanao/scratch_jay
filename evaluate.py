@@ -14,6 +14,19 @@ import pickle
 import numpy as np
 import librosa
 
+
+def convert_to_log_mel_spectrogram(y, sr=22050, n_mels=256, stft_win=1024, stft_hop=256):
+    S = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=n_mels, hop_length=stft_hop, win_length=stft_win)
+    log_S = librosa.power_to_db(S, ref=np.max)
+    return log_S
+
+def extract_feature_vector(log_mel_spectrogram, model):
+    log_mel_spectrogram = torch.tensor(log_mel_spectrogram).unsqueeze(0).unsqueeze(0).float().cuda()
+    with torch.no_grad():
+        feature_vector = model(log_mel_spectrogram).cpu().numpy().flatten()
+    return feature_vector
+    
+
 def generate_overlapping_segments(audio, sr, segment_duration=1, hop_duration=0.5):
     segment_length = int(segment_duration * sr)
     hop_length = int(hop_duration * sr)
